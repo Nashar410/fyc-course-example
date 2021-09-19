@@ -1,0 +1,40 @@
+version: "3.7"
+services:
+  nest-api:
+    container_name: nest-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./nest-api:/opt/project
+      - /opt/project/node_modules/
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: postgres
+    image: postgres:13-alpine3.14
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      - pgsql-volume:/var/lib/postgresql/data:delegated
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - -q
+        - -d
+        - $POSTGRES_DB
+        - -U
+        - $POSTGRES_USER
+
+volumes:
+  pgsql-volume: null
